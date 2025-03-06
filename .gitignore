@@ -1,0 +1,22 @@
+# Compiled executable files
+restpad-service.exe
+restpad-service.exe~
+
+# Environment variables
+.env
+
+# OS-specific files (optional, based on your OS)
+*.exe
+*.log
+*.tmp
+.DS_Store  # macOS
+Thumbs.db  # Windows
+
+# IDE/Editor files (optional)
+.vscode/
+.idea/
+*.swp  # Vim swap files
+
+# Go build files
+bin/
+pkg/
