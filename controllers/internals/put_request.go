@@ -36,7 +36,10 @@ func PutRequestHandler() gin.HandlerFunc {
 		// Open a connection to the database.
 		db, err := configs.OpenConnection()
 		if err != nil {
-			utils.HandleDBError(c, "Internal Server Error: unable to connect to database")
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"status":  "error",
+				"message": "Internal Server Error",
+			})
 			return
 		}
 		// Ensure the connection is closed once the handler finishes.
@@ -45,14 +48,20 @@ func PutRequestHandler() gin.HandlerFunc {
 		// Execute the update query.
 		res, err := db.Exec(updateQuery)
 		if err != nil {
-			utils.HandleDBError(c, "Failed to execute update query")
+			c.JSON(http.StatusBadRequest, gin.H{
+				"status":  "error",
+				"message": "Something went wrong",
+			})
 			return
 		}
 
 		// Retrieve the number of affected rows.
 		rowsAffected, err := res.RowsAffected()
 		if err != nil {
-			utils.HandleDBError(c, "Unable to retrieve affected rows")
+			c.JSON(http.StatusBadRequest, gin.H{
+				"status":  "error",
+				"message": "Something went wrong",
+			})
 			return
 		}
 
@@ -61,12 +70,18 @@ func PutRequestHandler() gin.HandlerFunc {
 			insertQuery := utils.BuildInsertQuery(data)
 			resInsert, err := db.Exec(insertQuery)
 			if err != nil {
-				utils.HandleDBError(c, "Failed to add new record, Required params missing")
+				c.JSON(http.StatusBadRequest, gin.H{
+					"status":  "error",
+					"message": "Something went wrong",
+				})
 				return
 			}
 			rowsInserted, err := resInsert.RowsAffected()
 			if err != nil {
-				utils.HandleDBError(c, "Unable to retrieve inserted rows")
+				c.JSON(http.StatusBadRequest, gin.H{
+					"status":  "error",
+					"message": "Something went wrong",
+				})
 				return
 			}
 			if rowsInserted == 0 {

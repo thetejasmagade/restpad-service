@@ -18,11 +18,10 @@ func PostRequestHandler() gin.HandlerFunc {
 
 		// Bind the JSON
 		if err := c.BindJSON(&data); err != nil {
-			// c.JSON(http.StatusBadRequest, gin.H{
-			// 	"status":  http.StatusBadRequest,
-			// 	"message": err.Error(),
-			// })
-			utils.HandleDBError(c, "Error in your provided data something wrong value is provided.")
+			c.JSON(http.StatusBadRequest, gin.H{
+				"status":  "error",
+				"message": "Invalid JSON payload: " + err.Error(),
+			})
 			return
 		}
 
@@ -32,7 +31,10 @@ func PostRequestHandler() gin.HandlerFunc {
 		// Make a connection to DB
 		db, err := configs.OpenConnection()
 		if err != nil {
-			utils.HandleDBError(c, "Internal Server Error")
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"status":  "error",
+				"message": "Internal Server Error",
+			})
 			return
 		}
 		defer configs.CloseConnection()
@@ -40,14 +42,20 @@ func PostRequestHandler() gin.HandlerFunc {
 		// Execute the Query
 		res, err := db.Exec(query)
 		if err != nil {
-			utils.HandleDBError(c, "Internal server error")
+			c.JSON(http.StatusBadRequest, gin.H{
+				"status":  "error",
+				"message": "Something went wrong",
+			})
 			return
 		}
 
 		// get RowsAffected
 		rowsAffectedCnt, err := res.RowsAffected()
 		if err != nil {
-			// handleDBError(c, "Couldn't create the new record")
+			c.JSON(http.StatusBadRequest, gin.H{
+				"status":  "error",
+				"message": "Something went wrong",
+			})
 			return
 		}
 

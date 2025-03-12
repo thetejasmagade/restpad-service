@@ -3,6 +3,8 @@ package controllers
 import (
 	"fmt"
 	"net/http"
+	"strconv"
+
 	"restpad/restpad-service/configs"
 	"restpad/restpad-service/utils"
 
@@ -14,8 +16,10 @@ func GetRequestHandler() gin.HandlerFunc {
 		// Make DB connection
 		db, err := configs.OpenConnection()
 		if err != nil {
-			utils.HandleDBError(c, "Internal Server Error")
-			// handleDBError(c, "Internal Server Error")
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"status":  "error",
+				"message": "Internal Server Error",
+			})
 			return
 		}
 		// Close the connection
@@ -24,24 +28,48 @@ func GetRequestHandler() gin.HandlerFunc {
 		var query string
 		condID := c.Param("cond_id")
 		queryParams := c.Request.URL.Query()
-		fmt.Println(queryParams)
 
 		if condID != "" {
 			query = utils.BuildGetQuery(condID)
 		} else if c.Query("_page") != "" && c.Query("_limit") != "" {
+			// Pagination block
+			pageParam := c.Query("_page")
+			limitParam := c.Query("_limit")
 
+			page, err := strconv.Atoi(pageParam)
+			if err != nil || page < 1 {
+				c.JSON(http.StatusBadRequest, gin.H{
+					"status":  "error",
+					"message": "Invalid page number",
+				})
+				return
+			}
+
+			limit, err := strconv.Atoi(limitParam)
+			if err != nil || limit < 1 {
+				c.JSON(http.StatusBadRequest, gin.H{
+					"status":  "error",
+					"message": "Invalid limit value",
+				})
+				return
+			}
+
+			offset := (page - 1) * limit
+			// Construct query with LIMIT and OFFSET for pagination
+			query = fmt.Sprintf("SELECT * FROM demo ORDER BY id DESC LIMIT %d OFFSET %d;", limit, offset)
 		} else if len(queryParams) > 0 {
 			singleValueParams := utils.ConvertQueryParams(queryParams)
 			query = utils.BuildGetQueryForFilters(singleValueParams)
 		} else {
 			query = "SELECT * FROM demo ORDER BY id DESC;"
 		}
+
 		// Execute the Query
 		rows, err := db.Query(query)
 		if err != nil {
-			c.JSON(http.StatusNotFound, gin.H{
+			c.JSON(http.StatusBadRequest, gin.H{
 				"status":  "error",
-				"message": "Data not found",
+				"message": "Something went wrong",
 			})
 			return
 		}
@@ -49,28 +77,26 @@ func GetRequestHandler() gin.HandlerFunc {
 
 		resultRows, err := utils.ConvertRowsIntoValues(rows)
 		if err != nil {
-			utils.HandleDBError(c, "Internal Server Error")
+			c.JSON(http.StatusBadRequest, gin.H{
+				"status":  "error",
+				"message": "Something went wrong",
+			})
 			return
 		}
-		if resultRows == nil && condID != "" {
+		if (resultRows == nil && condID != "") || (resultRows == nil && len(queryParams) > 0) {
 			c.JSON(http.StatusNotFound, gin.H{
 				"status":  "error",
-				"message": "Data not found",
+				"message": "Record not found",
 				"data":    utils.ResultRowsIfEmpty(resultRows),
-				// "rows_affected": len(resultRows), // Number of selected rows
 			})
 			return
 		}
 		fmt.Println(resultRows, "📌")
 
-		// fmt.Printf("Rows selected: %d\n", len(resultRows))
-		// fmt.Println("Selected data:", resultRows)
-
 		// Return JSON response with array
 		c.JSON(http.StatusOK, gin.H{
 			"status": "success",
 			"data":   utils.ResultRowsIfEmpty(resultRows),
-			// "rows_affected": len(resultRows), // Number of selected rows
 		})
 	}
 }

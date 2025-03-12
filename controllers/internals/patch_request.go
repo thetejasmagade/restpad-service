@@ -37,7 +37,10 @@ func PatchRequestHandler() gin.HandlerFunc {
 		// Open a connection to the database.
 		db, err := configs.OpenConnection()
 		if err != nil {
-			utils.HandleDBError(c, "Internal Server Error: unable to connect to database")
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"status":  "error",
+				"message": "Internal Server Error",
+			})
 			return
 		}
 		// Ensure the connection is closed once the handler finishes.
@@ -46,21 +49,26 @@ func PatchRequestHandler() gin.HandlerFunc {
 		// Execute the query.
 		res, err := db.Exec(query)
 		if err != nil {
-			utils.HandleDBError(c, "Database error: failed to execute update query")
+			c.JSON(http.StatusBadRequest, gin.H{
+				"status":  "error",
+				"message": "Something went wrong",
+			})
 			return
 		}
 
 		// Retrieve the number of affected rows.
 		rowsAffected, err := res.RowsAffected()
 		if err != nil {
-			utils.HandleDBError(c, "Database error: unable to retrieve affected rows")
+			c.JSON(http.StatusBadRequest, gin.H{
+				"status":  "error",
+				"message": "Something went wrong",
+			})
 			return
 		}
 		if rowsAffected == 0 {
 			c.JSON(http.StatusNotFound, gin.H{
-				"status":        "error",
-				"message":       "No record found",
-				"rows_affected": rowsAffected,
+				"status":  "error",
+				"message": "No record found",
 			})
 			return
 		}

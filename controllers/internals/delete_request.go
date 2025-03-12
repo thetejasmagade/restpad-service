@@ -36,14 +36,20 @@ func DeleteRequestHandler() gin.HandlerFunc {
 		// Execute the Query
 		res, err := db.Exec(query)
 		if err != nil {
-			utils.HandleDBError(c, "Couldn't Delete a Record")
+			c.JSON(http.StatusBadRequest, gin.H{
+				"status":  "error",
+				"message": "Something went wrong",
+			})
 			return
 		}
 
 		// get RowsAffected
 		rowsAffectedCnt, err := res.RowsAffected()
 		if err != nil {
-			// handleDBError(c, "Couldn't create the new record")
+			c.JSON(http.StatusBadRequest, gin.H{
+				"status":  "error",
+				"message": "Something went wrong",
+			})
 			return
 		}
 
