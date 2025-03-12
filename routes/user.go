@@ -19,6 +19,7 @@ func UserRouter(router *gin.Engine) {
 	user := router.Group("/:id")
 	{
 		user.GET("/data/", controllers.GetRequestHandler())
+		user.GET("/data/:cond_id/", controllers.GetRequestHandler())
 		user.POST("/data/", controllers.PostRequestHandler())
 		user.PUT("/data/:cond_id/", controllers.PutRequestHandler())
 		user.PATCH("/data/:cond_id/", controllers.PatchRequestHandler())

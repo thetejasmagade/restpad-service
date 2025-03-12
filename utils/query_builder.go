@@ -18,8 +18,26 @@ func formatValue(value interface{}) string {
 // Function to build Get Query
 func BuildGetQuery(condID string) string {
 	final := fmt.Sprintf("SELECT * FROM demo WHERE id = %s;", condID)
-
 	return final
+}
+
+func BuildGetQueryForFilters(queryParams map[string]string) string {
+	baseQuery := "SELECT * FROM demo"
+	var conditions []string
+
+	// Add query parameters to WHERE clause if provided
+	for key, value := range queryParams {
+		if value != "" {
+			conditions = append(conditions, fmt.Sprintf("%s = '%s'", key, value))
+		}
+	}
+
+	// Append WHERE clause if any conditions exist
+	if len(conditions) > 0 {
+		baseQuery += " WHERE " + strings.Join(conditions, " AND ")
+	}
+
+	return baseQuery + ";"
 }
 
 // Function to build Insert Query
