@@ -12,13 +12,16 @@ func AdminRouter(router *gin.Engine) {
 	// CORS Config
 	config := cors.DefaultConfig()
 	config.AllowOrigins = []string{"http://localhost:3000"}
-	router.Use(cors.New(config))
 
 	// Protect routes with JWT verification
 	admin := router.Group("app/api/v1")
+	admin.Use(cors.New(config))
 	admin.Use(middlewares.VerifySupabaseJWT()) // Apply JWT middleware
 	{
-		admin.GET("/", func(c *gin.Context) { c.String(200, "Hello, World!") })
+		admin.GET("/", func(c *gin.Context) {
+			c.JSON(200, gin.H{"foo": "bar"})
+		})
+
 		admin.POST("/post", controllers.PostRequestHandler())
 	}
 }

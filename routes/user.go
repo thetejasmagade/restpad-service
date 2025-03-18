@@ -14,9 +14,10 @@ func UserRouter(router *gin.Engine) {
 	// config.AllowOrigins = []string{"http://google.com", "http://facebook.com"}
 	// config.AllowAllOrigins = true
 
-	router.Use(cors.New(config))
+	// router.Use(cors.New(config))
 
 	user := router.Group("/:id")
+	user.Use(cors.New(config))
 	{
 		user.GET("/data/", controllers.GetRequestHandler())
 		user.GET("/data/:cond_id/", controllers.GetRequestHandler())
