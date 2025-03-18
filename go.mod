@@ -7,6 +7,7 @@ require github.com/gin-gonic/gin v1.9.1
 require (
 	github.com/chenzhuoyu/iasm v0.9.0 // indirect
 	github.com/gin-contrib/cors v1.5.0 // indirect
+	github.com/golang-jwt/jwt/v5 v5.2.1 // indirect
 )
 
 require (

@@ -1,10 +1,18 @@
 package main
 
 import (
+	"log"
 	"restpad/restpad-service/routes"
 
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 )
+
+func init() {
+	if err := godotenv.Load(); err != nil {
+		log.Println("No .env file found")
+	}
+}
 
 func main() {
 
