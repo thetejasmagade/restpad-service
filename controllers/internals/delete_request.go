@@ -11,16 +11,16 @@ import (
 
 func DeleteRequestHandler() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		var data map[string]interface{}
+		// var data map[string]interface{}
 
 		fmt.Println(c.Param("id"))
 		fmt.Println(c.Request.Header["Authorization"])
 
 		// Bind the JSON
-		if err := c.BindJSON(&data); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-			return
-		}
+		// if err := c.BindJSON(&data); err != nil {
+		// 	c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		// 	return
+		// }
 
 		// GENERATE Delete query
 		query := utils.BuildDeleteQuery(c.Param("cond_id"))

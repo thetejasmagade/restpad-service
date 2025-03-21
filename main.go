@@ -3,7 +3,9 @@ package main
 import (
 	"log"
 	"restpad/restpad-service/routes"
+	"time"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 )
@@ -18,6 +20,15 @@ func main() {
 
 	// Initialize Router
 	router := gin.Default()
+	router.RedirectTrailingSlash = false
+	router.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"*"}, // Your frontend origin
+		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+		MaxAge:           12 * time.Hour,
+	}))
 
 	// Registering routes for users
 	routes.UserRouter(router)

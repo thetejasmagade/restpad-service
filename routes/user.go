@@ -3,27 +3,40 @@ package routes
 import (
 	controllers "restpad/restpad-service/controllers/internals"
 
-	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
 func UserRouter(router *gin.Engine) {
 
-	config := cors.DefaultConfig()
-	config.AllowOrigins = []string{"http://127.0.0.1:5500"}
+	// config := cors.DefaultConfig()
+	// config.AllowOrigins = []string{"http://127.0.0.1:5500"}
 	// config.AllowOrigins = []string{"http://google.com", "http://facebook.com"}
 	// config.AllowAllOrigins = true
 
 	// router.Use(cors.New(config))
 
+	// userCors := cors.New(cors.Config{
+	// 	AllowOrigins:  []string{"*"}, // Allow all origins (adjust for production)
+	// 	AllowMethods:  []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
+	// 	AllowHeaders:  []string{"Content-Type"},
+	// 	ExposeHeaders: []string{"Content-Length"},
+	// })
+
 	user := router.Group("/:id")
-	user.Use(cors.New(config))
+	// user.Use(userCors)
+	// user.Use(cors.New(config))
 	{
+		user.GET("/data", controllers.GetRequestHandler())
 		user.GET("/data/", controllers.GetRequestHandler())
+		user.GET("/data/:cond_id", controllers.GetRequestHandler())
 		user.GET("/data/:cond_id/", controllers.GetRequestHandler())
+		user.POST("/data", controllers.PostRequestHandler())
 		user.POST("/data/", controllers.PostRequestHandler())
+		user.PUT("/data/:cond_id", controllers.PutRequestHandler())
 		user.PUT("/data/:cond_id/", controllers.PutRequestHandler())
+		user.PATCH("/data/:cond_id", controllers.PatchRequestHandler())
 		user.PATCH("/data/:cond_id/", controllers.PatchRequestHandler())
+		user.DELETE("/data/:cond_id", controllers.DeleteRequestHandler())
 		user.DELETE("/data/:cond_id/", controllers.DeleteRequestHandler())
 	}
 }
