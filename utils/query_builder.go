@@ -41,7 +41,7 @@ func BuildGetQueryForFilters(queryParams map[string]string) string {
 }
 
 // Function to build Insert Query
-func BuildInsertQuery(data map[string]interface{}) string {
+func BuildInsertQuery(data map[string]interface{}, tableName string) string {
 	var columns []string
 	var values []string
 
@@ -53,7 +53,7 @@ func BuildInsertQuery(data map[string]interface{}) string {
 	columnsStr := strings.Join(columns, ", ")
 	valuesStr := strings.Join(values, ", ")
 
-	final := fmt.Sprintf("INSERT INTO demo (%s) VALUES (%s);", columnsStr, valuesStr)
+	final := fmt.Sprintf("INSERT INTO %s (%s) VALUES (%s);", tableName, columnsStr, valuesStr)
 	return final
 }
 

@@ -9,7 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func PostRequestHandler() gin.HandlerFunc {
+func NewUserRequestHandler() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var data map[string]interface{}
 
@@ -27,7 +27,9 @@ func PostRequestHandler() gin.HandlerFunc {
 		}
 
 		// GENERATE insert query
-		query := utils.BuildInsertQuery(data)
+		query := utils.BuildInsertQuery(data, "users")
+
+		fmt.Println(query)
 
 		// Make a connection to DB
 		db, err := configs.OpenConnection()
@@ -39,6 +41,7 @@ func PostRequestHandler() gin.HandlerFunc {
 
 		// Execute the Query
 		res, err := db.Exec(query)
+		fmt.Println(err, "💪💪")
 		if err != nil {
 			utils.HandleDBError(c, "Internal server error")
 			return

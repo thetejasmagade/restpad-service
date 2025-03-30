@@ -66,6 +66,14 @@ func GetRequestHandler() gin.HandlerFunc {
 
 		// Execute the Query
 		rows, err := db.Query(query)
+		if rows == nil {
+			c.JSON(http.StatusNotFound, gin.H{
+				"status":  "error",
+				"message": "Record Not Found",
+				"data":    utils.ResultRowsIfEmpty(nil),
+			})
+			return
+		}
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{
 				"status":  "error",

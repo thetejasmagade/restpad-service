@@ -26,7 +26,7 @@ func PostRequestHandler() gin.HandlerFunc {
 		}
 
 		// GENERATE insert query
-		query := utils.BuildInsertQuery(data)
+		query := utils.BuildInsertQuery(data, "demo")
 
 		// Make a connection to DB
 		db, err := configs.OpenConnection()

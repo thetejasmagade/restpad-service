@@ -13,6 +13,28 @@ import (
 // Supabase JWT verification middleware
 func VerifySupabaseJWT() gin.HandlerFunc {
 	return func(c *gin.Context) {
+		allowedHosts := []string{"localhost:8080", "example.com", "api.example.com"}
+		clientURL := c.Request.Host
+
+		isValid := false
+		for _, host := range allowedHosts {
+			if host == clientURL {
+				isValid = true
+				break // Exit loop early
+			}
+		}
+
+		if !isValid {
+			c.JSON(http.StatusForbidden, gin.H{
+				"error": "Access denied: Unauthorized client URL",
+			})
+			c.Abort()
+			return
+		}
+
+		// Continue processing if valid
+		c.Next()
+
 		authHeader := c.GetHeader("Authorization")
 		if authHeader == "" {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Authorization token required"})

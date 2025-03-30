@@ -30,6 +30,6 @@ func AdminRouter(router *gin.Engine) {
 			c.JSON(200, gin.H{"foo": "bar"})
 		})
 
-		admin.POST("/post", controllers.PostRequestHandler())
+		admin.POST("user/add-user", controllers.NewUserRequestHandler())
 	}
 }

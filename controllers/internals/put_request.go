@@ -67,7 +67,7 @@ func PutRequestHandler() gin.HandlerFunc {
 
 		// If no record was updated, then insert a new record.
 		if rowsAffected == 0 {
-			insertQuery := utils.BuildInsertQuery(data)
+			insertQuery := utils.BuildInsertQuery(data, "demo")
 			resInsert, err := db.Exec(insertQuery)
 			if err != nil {
 				c.JSON(http.StatusBadRequest, gin.H{
