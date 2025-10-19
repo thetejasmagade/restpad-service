@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"strings"
 	"sync"
 
 	_ "github.com/lib/pq"
@@ -14,25 +15,36 @@ var (
 	connMutex sync.Mutex
 )
 
-// Config represents database configuration.
 type Config struct {
+	Host     string
+	Port     string
 	User     string
 	Password string
 	DBName   string
 	SSLMode  string
 }
 
-// loadConfig loads configuration values.
 func loadConfig() Config {
+	// assuming goDotEnvVariable returns the raw value from .env
 	return Config{
-		User:     goDotEnvVariable("USER"),
-		Password: goDotEnvVariable("PASSWORD"),
-		DBName:   goDotEnvVariable("DBNAME"),
-		SSLMode:  goDotEnvVariable("SSLMODE"),
+		Host:     strings.TrimSpace(goDotEnvVariable("HOST")),
+		Port:     strings.TrimSpace(goDotEnvVariable("PORT")),
+		User:     strings.TrimSpace(goDotEnvVariable("USER")),
+		Password: strings.TrimSpace(goDotEnvVariable("PASSWORD")),
+		DBName:   strings.TrimSpace(goDotEnvVariable("DBNAME")),
+		SSLMode:  strings.TrimSpace(goDotEnvVariable("SSLMODE")),
 	}
 }
 
-// OpenConnection opens a new database connection and returns it.
+func validSSLMode(m string) bool {
+	switch strings.ToLower(m) {
+	case "disable", "require", "verify-ca", "verify-full":
+		return true
+	default:
+		return false
+	}
+}
+
 func OpenConnection() (*sql.DB, error) {
 	connMutex.Lock()
 	defer connMutex.Unlock()
@@ -42,17 +54,35 @@ func OpenConnection() (*sql.DB, error) {
 	}
 
 	config := loadConfig()
-	connString := fmt.Sprintf("user=%s password=%s dbname=%s sslmode=%s", config.User, config.Password, config.DBName, config.SSLMode)
+
+	// remove surrounding quotes if any (e.g. "require")
+	config.SSLMode = strings.Trim(config.SSLMode, `"'`)
+
+	// final trim and lowercase for validation
+	ssl := strings.ToLower(strings.TrimSpace(config.SSLMode))
+	if ssl == "" {
+		// default to disable or require depending on your environment
+		ssl = "disable"
+	}
+	if !validSSLMode(ssl) {
+		return nil, fmt.Errorf("invalid sslmode %q; allowed: disable, require, verify-ca, verify-full", config.SSLMode)
+	}
+
+	connString := fmt.Sprintf(
+		"host=%s port=%s user=%s password=%s dbname=%s sslmode=%s",
+		config.Host, config.Port, config.User, config.Password, config.DBName, ssl,
+	)
 
 	db, err := sql.Open("postgres", connString)
 	if err != nil {
-		log.Println("Error opening database connection:", err)
+		log.Printf("Error opening database connection: %v", err)
 		return nil, err
 	}
 
-	err = db.Ping()
-	if err != nil {
-		log.Println("Error pinging database:", err)
+	if err = db.Ping(); err != nil {
+		// close the DB handle if ping fails to avoid leaking
+		_ = db.Close()
+		log.Printf("Error pinging database: %v", err)
 		return nil, err
 	}
 

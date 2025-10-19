@@ -32,9 +32,6 @@ func VerifySupabaseJWT() gin.HandlerFunc {
 			return
 		}
 
-		// Continue processing if valid
-		c.Next()
-
 		authHeader := c.GetHeader("Authorization")
 		if authHeader == "" {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Authorization token required"})
