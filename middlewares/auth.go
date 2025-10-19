@@ -49,7 +49,6 @@ func VerifySupabaseJWT() gin.HandlerFunc {
 
 		// Get Supabase JWT Secret (Find this in Supabase Dashboard → API → JWT Secret)
 		supabaseSecret := os.Getenv("SUPABASE_JWT_SECRET")
-		fmt.Println(supabaseSecret, "Edw")
 		if supabaseSecret == "" {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Supabase secret key missing"})
 			c.Abort()

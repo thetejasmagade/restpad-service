@@ -29,8 +29,6 @@ func NewUserRequestHandler() gin.HandlerFunc {
 		// GENERATE insert query
 		query := utils.BuildInsertQuery(data, "users")
 
-		fmt.Println(query)
-
 		// Make a connection to DB
 		db, err := configs.OpenConnection()
 		if err != nil {
@@ -41,7 +39,6 @@ func NewUserRequestHandler() gin.HandlerFunc {
 
 		// Execute the Query
 		res, err := db.Exec(query)
-		fmt.Println(err, "💪💪")
 		if err != nil {
 			utils.HandleDBError(c, "Internal server error")
 			return

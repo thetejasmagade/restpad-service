@@ -99,7 +99,6 @@ func GetRequestHandler() gin.HandlerFunc {
 			})
 			return
 		}
-		fmt.Println(resultRows, "📌")
 
 		// Return JSON response with array
 		c.JSON(http.StatusOK, gin.H{
